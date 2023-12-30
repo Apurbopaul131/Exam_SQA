@@ -1,0 +1,51 @@
+const { Builder, By, until } = require('selenium-webdriver');
+const assert = require('assert');
+
+(async function example() {
+    let driver;
+    try {
+        driver = await new Builder().forBrowser('firefox').build();
+        const loginInfo = [
+            {
+                userName: 'standard_user',
+                password: 'secre'
+            },
+            {
+                userName: 'standard',
+                password: 'secret_sauce'
+            },
+            {
+                userName: 'standard_user',
+                password: 'secret_sauce'
+            }
+        ];
+
+        for (const { userName, password } of loginInfo) {
+            await testLogin(driver, userName, password);
+        }
+    } catch (error) {
+        console.error('An error occurred:', error.message);
+    } finally {
+        driver.quit();
+    }
+})();
+
+async function testLogin(driver, id, password) {
+    try {
+        await driver.get('https://www.saucedemo.com/');
+        const title = await driver.getTitle();
+        console.log(title);
+        await driver.wait(until.titleIs(title), 5000);
+        await driver.findElement(By.id('user-name')).sendKeys(id);
+        await driver.findElement(By.id('password')).sendKeys(password);
+        await driver.findElement(By.id('login-button')).click(); 
+
+        
+        await driver.wait(until.urlIs('https://www.saucedemo.com/inventory.html'), 5000);
+        
+
+        console.log(`Login test for username ${id} and password ${password} passed.`);
+    } catch (error) {
+        console.log(`Login test for username ${id} and password ${password} failed.`);
+    }
+}
